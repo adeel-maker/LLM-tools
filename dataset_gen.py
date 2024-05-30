@@ -1,6 +1,5 @@
 import gradio as gr
-from bs4 import BeautifulSoup
-import requests
+from langchain_community.document_loaders import WebBaseLoader
 import csv
 import json
 from groq import Groq
@@ -12,8 +11,9 @@ csv_file_path = 'dataGroq.csv'
 # Function to load and display webpage content
 def load_and_display_webpage_content(url, model_name, save_to_csv):
     try:
-        html = requests.get(url).text
-        text_content = BeautifulSoup(html, "html.parser").get_text(strip=True, separator=' ')
+        loader = WebBaseLoader(url)
+        data = (loader.load())[0].page_content
+        text_content =' '.join(data.split())
         
         prompt = "Extract the title, price, brand, and retailer from the following context in JSON format."
         script_content = f"{prompt}:\n ```{text_content}```"
